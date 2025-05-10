@@ -1,6 +1,7 @@
 const Booking = require("../models/Booking");
 const Activity = require("../models/Activity");
 const Joi = require("joi");
+const { isValidObjectId } = require("mongoose");
 
 // Book an activity
 const bookActivity = async (req, res) => {
@@ -13,9 +14,22 @@ const bookActivity = async (req, res) => {
 
   const { activityId } = req.body;
   try {
+      if (!isValidObjectId(activityId)) {
+        return res.status(400).json({message:new ErrorResponse("Invalid activity ID")});
+    }
     const activity = await Activity.findById(activityId);
     if (!activity) return res.status(404).json({ message: "Activity not found" });
 
+     // Ensure activity is in the future
+     if (new Date(activity.date) < new Date()) {
+      return res.status(400).json({message:"Cannot book an activity that has already occurred"});
+      }
+
+      // Prevent duplicate booking
+      const existingBooking = await Booking.findOne({ userId: req.user.id, activityId });
+      if (existingBooking) {
+          return res.status(400).json({message:"You have already booked this activity"});
+      }
     const booking = new Booking({
       userId: req.user.id,
       activityId: activityId,
@@ -23,11 +37,8 @@ const bookActivity = async (req, res) => {
 
     await booking.save();
     res.status(201).json({ message: "Activity booked successfully", booking });
-  } catch (error) {
-    if (error.code === 11000) {
-      // Handle duplicate booking error
-      return res.status(400).json({message:`You have already booked this activity`});
   }
+   catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
