@@ -24,6 +24,10 @@ const bookActivity = async (req, res) => {
     await booking.save();
     res.status(201).json({ message: "Activity booked successfully", booking });
   } catch (error) {
+    if (error.code === 11000) {
+      // Handle duplicate booking error
+      return res.status(400).json({message:`You have already booked this activity`});
+  }
     res.status(500).json({ message: "Server error", error });
   }
 };

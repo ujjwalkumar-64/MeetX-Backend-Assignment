@@ -9,4 +9,7 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Create a compound index for userId and activityId to enforce uniqueness
+bookingSchema.index({ userId: 1, activityId: 1 }, { unique: true });
+
 module.exports = mongoose.model("Booking", bookingSchema);
