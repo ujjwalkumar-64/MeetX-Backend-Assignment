@@ -129,7 +129,7 @@ The backend is deployed on Render for seamless hosting. The deployment includes:
 
 The API implements rate limiting to prevent abuse:
 
-- **General API Rate**: Limits to 100 requests per 15 minutes per IP.
+- **General API Rate**: Limits to 10 requests per 15 minutes per IP.
 - **Login API Rate**: Limits to 5 login attempts per 10 minutes per IP.
 
 ---
