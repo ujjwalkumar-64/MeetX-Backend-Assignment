@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
-
+const { apiRateLimiter, loginRateLimiter } = require("./middlewares/rateLimiter");
 // Load environment variables
 dotenv.config(); 
 
@@ -10,10 +10,17 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+
 // Import routes
 const userRoutes = require("./routes/userRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+
+// Apply general rate limiter to all routes
+app.use(apiRateLimiter);
+
+// Apply login-specific rate limiter to login route
+app.use("/api/users/login", loginRateLimiter); 
 
 // Use routes
 app.use("/api/users", userRoutes);
